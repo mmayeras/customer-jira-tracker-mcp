@@ -7,13 +7,13 @@ For local development and testing with Podman
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from urllib.parse import unquote
 
-from fastapi import FastAPI, HTTPException, Header, Depends
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Header, Depends, Query
+from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 import uvicorn
 
@@ -119,6 +119,110 @@ def save_customer_data(customer_data: CustomerData) -> None:
     except Exception as e:
         logger.error(f"Error saving customer data for {customer_data.customer}: {e}")
         raise HTTPException(status_code=500, detail="Failed to save customer data")
+
+async def generate_markdown_export(customer_data: CustomerData, include_jira_info: bool = False) -> str:
+    """Generate Markdown export for customer ticket data"""
+    md_lines = []
+    
+    # Header
+    md_lines.append(f"# Customer: {customer_data.customer}")
+    md_lines.append("")
+    md_lines.append(f"**Last Updated:** {customer_data.last_updated}")
+    md_lines.append(f"**Total Tickets:** {customer_data.total_tickets}")
+    md_lines.append(f"**Total Comments:** {customer_data.total_comments}")
+    md_lines.append("")
+    
+    # Notes section
+    if customer_data.notes:
+        md_lines.append("## Notes")
+        md_lines.append(customer_data.notes)
+        md_lines.append("")
+    
+    # Tickets table
+    md_lines.append("## Tickets")
+    md_lines.append("")
+    
+    if not customer_data.tickets:
+        md_lines.append("*No tickets found*")
+    else:
+        # Table header
+        headers = ["Ticket Key", "Added Date", "Comments"]
+        if include_jira_info:
+            headers.extend(["Status", "Priority", "Assignee", "Last Updated"])
+        
+        md_lines.append("| " + " | ".join(headers) + " |")
+        md_lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+        
+        # Table rows
+        for ticket in customer_data.tickets:
+            row = [
+                f"`{ticket.key}`",
+                ticket.added_date[:10],  # Just the date part
+                str(len(ticket.comments))
+            ]
+            
+            if include_jira_info:
+                # Fetch JIRA data for this ticket via MCP
+                jira_data = await fetch_jira_ticket_data_via_mcp(ticket.key)
+                row.extend([
+                    jira_data["status"],
+                    jira_data["priority"],
+                    jira_data["assignee"],
+                    jira_data["last_updated"]
+                ])
+            
+            md_lines.append("| " + " | ".join(row) + " |")
+    
+    md_lines.append("")
+    
+    # Comments section
+    md_lines.append("## Comments")
+    md_lines.append("")
+    
+    has_comments = any(ticket.comments for ticket in customer_data.tickets)
+    if not has_comments:
+        md_lines.append("*No comments found*")
+    else:
+        for ticket in customer_data.tickets:
+            if ticket.comments:
+                md_lines.append(f"### {ticket.key}")
+                for comment in ticket.comments:
+                    md_lines.append(f"**{comment.timestamp[:19]}**")
+                    md_lines.append("")
+                    md_lines.append(comment.comment)
+                    md_lines.append("")
+    
+    return "\n".join(md_lines)
+
+def save_markdown_export(customer_name: str, markdown_content: str) -> str:
+    """Save markdown export to customer data directory"""
+    safe_name = customer_name.replace(" ", "_").replace("/", "_")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{safe_name}_export_{timestamp}.md"
+    file_path = Path(STORAGE_DIR) / filename
+    
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(markdown_content)
+        logger.info(f"Saved markdown export for {customer_name} to {file_path}")
+        return str(file_path)
+    except Exception as e:
+        logger.error(f"Error saving markdown export for {customer_name}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save markdown export")
+
+async def fetch_jira_ticket_data_via_mcp(ticket_key: str) -> Dict[str, str]:
+    """Fetch JIRA ticket data via MCP server"""
+    try:
+        from jira_mcp_client import jira_client
+        return await jira_client.get_issue_data(ticket_key)
+    except Exception as e:
+        logger.error(f"Error fetching JIRA data for ticket {ticket_key} via MCP: {e}")
+        return {
+            "status": "N/A (MCP Error)",
+            "priority": "N/A (MCP Error)",
+            "assignee": "N/A (MCP Error)",
+            "last_updated": "N/A (MCP Error)"
+        }
 
 # Health check endpoints
 @app.get("/health")
@@ -257,6 +361,38 @@ async def list_customers(api_key: str = Depends(get_api_key)):
             logger.error(f"Error reading customer file {file_path}: {e}")
     
     return {"customers": customers}
+
+@app.get("/api/customers/{customer_name}/export")
+async def export_customer_data(
+    customer_name: str,
+    format: str = Query("markdown", description="Export format (markdown)"),
+    include_jira: bool = Query(False, description="Include JIRA information (requires JIRA integration)"),
+    save_file: bool = Query(True, description="Save export to file"),
+    api_key: str = Depends(get_api_key)
+):
+    """Export customer data in specified format"""
+    customer_data = load_customer_data(customer_name)
+    
+    if format.lower() == "markdown":
+        markdown_content = await generate_markdown_export(customer_data, include_jira_info=include_jira)
+        
+        if save_file:
+            file_path = save_markdown_export(customer_name, markdown_content)
+            return {
+                "customer": customer_name,
+                "format": "markdown",
+                "content": markdown_content,
+                "saved_to": file_path,
+                "include_jira": include_jira
+            }
+        else:
+            return PlainTextResponse(
+                content=markdown_content,
+                media_type="text/markdown",
+                headers={"Content-Disposition": f"attachment; filename={customer_name}_export.md"}
+            )
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported format. Only 'markdown' is supported.")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))

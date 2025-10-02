@@ -5,8 +5,9 @@ WORKDIR /app
 # Install dependencies
 RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx mcp
 
-# Copy the local server
+# Copy the local server and JIRA client
 COPY local_http_server.py .
+COPY jira_mcp_client.py .
 
 # Set default storage to /data
 ENV CUSTOMER_JIRA_STORAGE=/data

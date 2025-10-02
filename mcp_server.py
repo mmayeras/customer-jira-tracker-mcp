@@ -95,6 +95,15 @@ class CustomerJiraTrackerAPI:
     async def list_customers(self) -> Dict:
         """List all customers"""
         return await self._make_request("GET", "/api/customers")
+    
+    async def export_customer_data(self, customer_name: str, format: str = "markdown", include_jira: bool = False, save_file: bool = True) -> Dict:
+        """Export customer data in specified format"""
+        endpoint = f"/api/customers/{customer_name}/export"
+        # Add query parameters to the URL
+        query_params = f"?format={format}&include_jira={str(include_jira).lower()}&save_file={str(save_file).lower()}"
+        endpoint += query_params
+        return await self._make_request("GET", endpoint)
+    
 
 # Initialize the API client
 api_client = CustomerJiraTrackerAPI(API_URL, API_KEY)
@@ -210,6 +219,35 @@ async def handle_list_tools() -> ListToolsResult:
                     "type": "object",
                     "properties": {}
                 }
+            ),
+            Tool(
+                name="export_customer_data",
+                description="Export customer ticket data in Markdown format",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "customer_name": {
+                            "type": "string",
+                            "description": "Name of the customer to export"
+                        },
+                        "format": {
+                            "type": "string",
+                            "description": "Export format (default: markdown)",
+                            "default": "markdown"
+                        },
+                        "include_jira": {
+                            "type": "boolean",
+                            "description": "Include JIRA information (requires JIRA integration)",
+                            "default": false
+                        },
+                        "save_file": {
+                            "type": "boolean",
+                            "description": "Save export to file in customer data directory",
+                            "default": true
+                        }
+                    },
+                    "required": ["customer_name"]
+                }
             )
         ]
     )
@@ -251,6 +289,14 @@ async def handle_call_tool(name: str, arguments: Dict[str, Any]):
         
         elif name == "list_customers":
             result = await api_client.list_customers()
+            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
+        elif name == "export_customer_data":
+            customer_name = arguments["customer_name"]
+            format_type = arguments.get("format", "markdown")
+            include_jira = arguments.get("include_jira", False)
+            save_file = arguments.get("save_file", True)
+            result = await api_client.export_customer_data(customer_name, format_type, include_jira, save_file)
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
         
         else:

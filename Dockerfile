@@ -5,8 +5,11 @@ WORKDIR /app
 # Copy the OpenShift application files
 COPY openshift/ .
 
+# Copy the shared jira_mcp_client.py from root
+COPY jira_mcp_client.py .
+
 # Install dependencies
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx mcp
 
 # Set default storage to /data
 ENV CUSTOMER_JIRA_STORAGE=/data

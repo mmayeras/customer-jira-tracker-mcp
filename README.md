@@ -7,6 +7,7 @@ A comprehensive JIRA ticket tracking system with MCP (Model Context Protocol) in
 - **Customer Management**: Create and manage customer profiles
 - **Ticket Tracking**: Add, remove, and track JIRA tickets per customer
 - **Comment System**: Add comments to individual tickets
+- **Export Functionality**: Export customer data to Markdown format with JIRA integration
 - **MCP Integration**: Direct integration with Cursor IDE via MCP protocol
 - **Dual Deployment**: Support for both local development and OpenShift production
 - **Flexible Authentication**: API key-based authentication with SSL verification control
@@ -84,6 +85,81 @@ uv run local_http_server.py
 ### 4. Restart Cursor IDE
 
 After configuration, restart Cursor to load the MCP servers.
+
+## 📊 Export Functionality
+
+The Customer JIRA Tracker includes powerful export capabilities to generate Markdown reports of customer ticket data.
+
+### Export Features
+
+- **Markdown Format**: Clean, readable Markdown tables
+- **JIRA Integration**: Optional JIRA data (Status, Priority, Assignee, Last Updated)
+- **Customer Summary**: Total tickets, comments, and last updated information
+- **Comments Section**: Detailed ticket comments with timestamps
+- **File Storage**: Automatic saving to customer data directory
+
+### Export API Endpoint
+
+```bash
+GET /api/customers/{customer_name}/export
+```
+
+**Parameters:**
+- `format` (default: "markdown") - Export format
+- `include_jira` (default: false) - Include JIRA information
+- `save_file` (default: true) - Save to file in customer data directory
+
+**Example Usage:**
+
+```bash
+# Basic export
+curl "http://localhost:8080/api/customers/AA/export"
+
+# Export with JIRA data
+curl "http://localhost:8080/api/customers/AA/export?include_jira=true"
+
+# Export without saving to file
+curl "http://localhost:8080/api/customers/AA/export?save_file=false"
+```
+
+### MCP Tool Usage
+
+In Cursor IDE, use the `export_customer_data` tool:
+
+```json
+{
+  "customer_name": "AA",
+  "format": "markdown",
+  "include_jira": true,
+  "save_file": true
+}
+```
+
+### Export Output Example
+
+```markdown
+# Customer: AA
+
+**Last Updated:** 2025-10-02T11:40:36.101729
+**Total Tickets:** 2
+**Total Comments:** 1
+
+## Notes
+Initial ticket for AA customer
+
+## Tickets
+
+| Ticket Key | Added Date | Comments | Status | Priority | Assignee | Last Updated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `RFE-1234` | 2025-10-02 | 1 | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) |
+
+## Comments
+
+### RFE-1234
+**2025-10-02T11:38:25**
+
+This is a test comment for the export functionality
+```
 
 ## 🔧 Configuration
 

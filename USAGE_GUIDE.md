@@ -10,10 +10,11 @@ This comprehensive guide covers everything you need to know about using the Cust
 4. [Configuration](#configuration)
 5. [Authentication & Security](#authentication--security)
 6. [Using MCP Tools in Cursor](#using-mcp-tools-in-cursor)
-7. [API Reference](#api-reference)
-8. [Deployment Scenarios](#deployment-scenarios)
-9. [Troubleshooting](#troubleshooting)
-10. [Advanced Usage](#advanced-usage)
+7. [Export Functionality](#export-functionality)
+8. [API Reference](#api-reference)
+9. [Deployment Scenarios](#deployment-scenarios)
+10. [Troubleshooting](#troubleshooting)
+11. [Advanced Usage](#advanced-usage)
 
 ## 🎯 Overview
 
@@ -309,6 +310,92 @@ mcp_customer-jira-tracker-local_update_customer_notes
   customer_name: "ACME Corp"
   notes: "Updated customer information"
 ```
+
+## 📊 Export Functionality
+
+The Customer JIRA Tracker includes powerful export capabilities to generate comprehensive Markdown reports of customer ticket data.
+
+### Export Features
+
+- **Markdown Format**: Clean, readable Markdown tables with proper formatting
+- **JIRA Integration**: Optional JIRA data (Status, Priority, Assignee, Last Updated)
+- **Customer Summary**: Total tickets, comments, and last updated information
+- **Comments Section**: Detailed ticket comments with timestamps
+- **File Storage**: Automatic saving to customer data directory with timestamps
+
+### MCP Export Tool
+
+#### Export Customer Data
+```python
+mcp_customer-jira-tracker-local_export_customer_data
+  customer_name: "ACME Corp"
+  format: "markdown"
+  include_jira: true
+  save_file: true
+```
+
+**Parameters:**
+- `customer_name` (required): Name of the customer to export
+- `format` (optional): Export format, defaults to "markdown"
+- `include_jira` (optional): Include JIRA information, defaults to false
+- `save_file` (optional): Save to file, defaults to true
+
+**Response:**
+```json
+{
+  "customer": "ACME Corp",
+  "format": "markdown",
+  "content": "# Customer: ACME Corp\n\n**Last Updated:** 2025-10-02T11:40:36.101729\n...",
+  "saved_to": "customer_jira_data/ACME_Corp_export_20251002_115337.md",
+  "include_jira": true
+}
+```
+
+### Export Output Format
+
+The export generates a comprehensive Markdown document with:
+
+1. **Header Section**: Customer name, last updated, ticket counts
+2. **Notes Section**: Customer notes (if any)
+3. **Tickets Table**: 
+   - Basic: Ticket Key, Added Date, Comments count
+   - With JIRA: Adds Status, Priority, Assignee, Last Updated columns
+4. **Comments Section**: Detailed comments for each ticket with timestamps
+
+**Example Output:**
+```markdown
+# Customer: ACME Corp
+
+**Last Updated:** 2025-10-02T11:40:36.101729
+**Total Tickets:** 2
+**Total Comments:** 1
+
+## Notes
+Customer notes here
+
+## Tickets
+
+| Ticket Key | Added Date | Comments | Status | Priority | Assignee | Last Updated |
+| --- | --- | --- | --- | --- | --- | --- |
+| `AAA-1234` | 2025-10-02 | 1 | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) |
+| `BBB-5678` | 2025-10-02 | 0 | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) | N/A (MCP Integration Pending) |
+
+## Comments
+
+### AAA-1234
+**2025-10-02T11:38:25**
+
+This is a comment for the ticket
+```
+
+### File Storage
+
+Export files are automatically saved to the customer data directory with the naming convention:
+```
+{customer_name}_export_{timestamp}.md
+```
+
+Example: `ACME_Corp_export_20251002_115337.md`
 
 ## 📚 API Reference
 
