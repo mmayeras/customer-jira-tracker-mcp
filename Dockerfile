@@ -7,6 +7,8 @@ COPY openshift/ .
 
 # Copy the shared jira_mcp_client.py from root
 COPY jira_mcp_client.py .
+# Copy the global index manager
+COPY global_index_manager.py .
 
 # Install dependencies
 RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx mcp

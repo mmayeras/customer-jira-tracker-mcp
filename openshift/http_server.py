@@ -365,6 +365,7 @@ async def fetch_jira_ticket_data_via_mcp(ticket_key: str) -> Dict[str, str]:
         import os
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from jira_mcp_client import jira_client
+        from global_index_manager import index_manager
         return await jira_client.get_issue_data(ticket_key)
     except Exception as e:
         logger.error(f"Error fetching JIRA data for ticket {ticket_key} via MCP: {e}")
@@ -407,6 +408,55 @@ async def export_customer_data(
             )
     else:
         raise HTTPException(status_code=400, detail="Unsupported format. Only 'markdown' is supported.")
+
+# Global index endpoints
+@app.get("/api/cases/{case_id}")
+async def get_case_info(
+    case_id: str,
+    api_key: str = Depends(get_api_key)
+):
+    """Get customer and tickets for a specific case ID"""
+    case_info = index_manager.get_case_info(case_id)
+    if not case_info:
+        raise HTTPException(status_code=404, detail=f"Case ID {case_id} not found")
+    return case_info
+
+@app.get("/api/search/tickets")
+async def search_tickets(
+    q: str = Query(..., description="Search term for ticket titles"),
+    api_key: str = Depends(get_api_key)
+):
+    """Search tickets by title"""
+    results = index_manager.search_tickets_by_title(q)
+    return {"query": q, "results": results, "count": len(results)}
+
+@app.get("/api/cases")
+async def get_all_cases(
+    api_key: str = Depends(get_api_key)
+):
+    """Get all case IDs in the system"""
+    case_ids = index_manager.get_all_case_ids()
+    return {"case_ids": case_ids, "count": len(case_ids)}
+
+@app.post("/api/rebuild-index")
+async def rebuild_global_index(
+    api_key: str = Depends(get_api_key)
+):
+    """Rebuild the global index from all customer files"""
+    try:
+        index_manager.rebuild_index()
+        stats = index_manager.get_stats()
+        return {"message": "Global index rebuilt successfully", "stats": stats}
+    except Exception as e:
+        logger.error(f"Error rebuilding global index: {e}")
+        raise HTTPException(status_code=500, detail="Failed to rebuild global index")
+
+@app.get("/api/stats")
+async def get_system_stats(
+    api_key: str = Depends(get_api_key)
+):
+    """Get system statistics"""
+    return index_manager.get_stats()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
