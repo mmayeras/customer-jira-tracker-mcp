@@ -66,20 +66,20 @@ echo "  - Local development: Usually 'true' (verify SSL certificates)"
 echo "  - OpenShift with self-signed certificates: Usually 'false'"
 echo ""
 
-echo -n "Enable SSL verification for local development? (y/N): "
+echo -n "Enable SSL verification for local development? (Y/n): "
 read -r SSL_VERIFY_LOCAL
-if [[ "$SSL_VERIFY_LOCAL" =~ ^[Yy]$ ]]; then
-    SSL_VERIFY_LOCAL="true"
-else
+if [[ "$SSL_VERIFY_LOCAL" =~ ^[Nn]$ ]]; then
     SSL_VERIFY_LOCAL="false"
+else
+    SSL_VERIFY_LOCAL="true"
 fi
 
-echo -n "Enable SSL verification for OpenShift? (y/N): "
+echo -n "Enable SSL verification for OpenShift? (Y/n): "
 read -r SSL_VERIFY_OPENSHIFT
-if [[ "$SSL_VERIFY_OPENSHIFT" =~ ^[Yy]$ ]]; then
-    SSL_VERIFY_OPENSHIFT="true"
-else
+if [[ "$SSL_VERIFY_OPENSHIFT" =~ ^[Nn]$ ]]; then
     SSL_VERIFY_OPENSHIFT="false"
+else
+    SSL_VERIFY_OPENSHIFT="true"
 fi
 
 # Generate MCP configuration from template

@@ -27,7 +27,8 @@ class JiraMCPClient:
                 "status": "N/A (MCP Integration Pending)",
                 "priority": "N/A (MCP Integration Pending)",
                 "assignee": "N/A (MCP Integration Pending)",
-                "last_updated": "N/A (MCP Integration Pending)"
+                "last_updated": "N/A (MCP Integration Pending)",
+                "title": "N/A (MCP Integration Pending)"
             }
                 
         except Exception as e:
@@ -36,8 +37,19 @@ class JiraMCPClient:
                 "status": "Error",
                 "priority": "Error",
                 "assignee": "Error",
-                "last_updated": "Error"
+                "last_updated": "Error",
+                "title": "Error"
             }
+    
+    async def get_issue_title(self, issue_key: str) -> str:
+        """Get JIRA issue title via MCP"""
+        try:
+            # This would use the actual MCP tools when available
+            # For now, return placeholder data indicating MCP integration is needed
+            return "N/A (MCP Integration Pending)"
+        except Exception as e:
+            logger.error(f"Error fetching JIRA title for {issue_key}: {e}")
+            return "Error"
 
 # Global instance
 jira_client = JiraMCPClient()

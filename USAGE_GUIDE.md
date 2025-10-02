@@ -129,7 +129,7 @@ After configuration, restart Cursor to load the MCP servers.
 |----------|-------------|---------|----------|---------|
 | `CUSTOMER_JIRA_API_URL` | HTTP API server URL | `http://localhost:8080` | Yes | `https://api.example.com` |
 | `CUSTOMER_JIRA_API_KEY` | API authentication key | `local-dev-key` | Yes | `abc123def456` |
-| `CUSTOMER_JIRA_SSL_VERIFY` | Enable/disable SSL verification | `true` | No | `false` |
+| `CUSTOMER_JIRA_SSL_VERIFY` | Enable/disable SSL verification | `true` | No | `true` |
 
 ### MCP Server Configuration
 
@@ -159,7 +159,7 @@ After configuration, restart Cursor to load the MCP servers.
     "env": {
       "CUSTOMER_JIRA_API_URL": "https://customer-jira-tracker-mcp.apps.example.com",
       "CUSTOMER_JIRA_API_KEY": "production-api-key-here",
-      "CUSTOMER_JIRA_SSL_VERIFY": "false"
+      "CUSTOMER_JIRA_SSL_VERIFY": "true"
     }
   }
 }
@@ -509,7 +509,7 @@ Example: `ACME_Corp_export_20251002_115337.md`
        "env": {
          "CUSTOMER_JIRA_API_URL": "https://your-openshift-route.com",
          "CUSTOMER_JIRA_API_KEY": "your-production-key",
-         "CUSTOMER_JIRA_SSL_VERIFY": "false"
+         "CUSTOMER_JIRA_SSL_VERIFY": "true"
        }
      }
    }
@@ -548,7 +548,7 @@ Example: `ACME_Corp_export_20251002_115337.md`
 
 **Symptoms**: `[SSL: CERTIFICATE_VERIFY_FAILED]` errors
 **Solutions**:
-- Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates
+- Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates (default is `true`)
 - Ensure HTTPS URL is used for OpenShift
 - Check certificate validity
 

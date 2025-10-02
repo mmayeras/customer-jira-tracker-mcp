@@ -199,7 +199,7 @@ The MCP server supports two deployment modes:
     "env": {
       "CUSTOMER_JIRA_API_URL": "https://your-openshift-url.com",
       "CUSTOMER_JIRA_API_KEY": "your-production-key",
-      "CUSTOMER_JIRA_SSL_VERIFY": "false"
+      "CUSTOMER_JIRA_SSL_VERIFY": "true"
     }
   }
 }
@@ -283,7 +283,7 @@ podman build -t customer-jira-tracker .
 ### OpenShift Production
 1. Deploy using the provided OpenShift manifests
 2. Configure MCP with production settings
-3. Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates
+3. Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates (default is `true`)
 4. Restart Cursor IDE
 
 ## 🔍 Troubleshooting
@@ -296,7 +296,7 @@ podman build -t customer-jira-tracker .
    - Verify MCP server is running
 
 2. **SSL Certificate Errors**
-   - Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates
+   - Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates (default is `true`)
    - Ensure HTTPS URL is used for OpenShift
 
 3. **API Connection Errors**

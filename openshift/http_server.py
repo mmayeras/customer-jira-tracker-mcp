@@ -28,6 +28,8 @@ class TicketComment(BaseModel):
 
 class CustomerTicket(BaseModel):
     key: str
+    title: str = ""
+    caseID: str = "XXXXXXX"
     added_date: str
     comments: List[TicketComment] = []
 
@@ -153,9 +155,15 @@ async def add_customer_tickets(
     # Add new tickets
     for ticket_key in request.ticket_keys:
         if ticket_key not in customer_data.ticket_keys:
+            # Fetch title from JIRA
+            jira_data = await fetch_jira_ticket_data_via_mcp(ticket_key)
+            title = jira_data.get("title", "")
+            
             customer_data.ticket_keys.append(ticket_key)
             customer_data.tickets.append(CustomerTicket(
                 key=ticket_key,
+                title=title,
+                caseID="XXXXXXX",  # Default caseID
                 added_date=datetime.now().isoformat()
             ))
     
@@ -284,7 +292,7 @@ async def generate_markdown_export(customer_data: CustomerData, include_jira_inf
         md_lines.append("*No tickets found*")
     else:
         # Table header
-        headers = ["Ticket Key", "Added Date", "Comments"]
+        headers = ["Ticket Key", "Title", "Case ID", "Added Date", "Comments"]
         if include_jira_info:
             headers.extend(["Status", "Priority", "Assignee", "Last Updated"])
         
@@ -295,6 +303,8 @@ async def generate_markdown_export(customer_data: CustomerData, include_jira_inf
         for ticket in customer_data.tickets:
             row = [
                 f"`{ticket.key}`",
+                ticket.title or "N/A",
+                ticket.caseID,
                 ticket.added_date[:10],  # Just the date part
                 str(len(ticket.comments))
             ]
@@ -362,7 +372,8 @@ async def fetch_jira_ticket_data_via_mcp(ticket_key: str) -> Dict[str, str]:
             "status": "N/A (MCP Error)",
             "priority": "N/A (MCP Error)",
             "assignee": "N/A (MCP Error)",
-            "last_updated": "N/A (MCP Error)"
+            "last_updated": "N/A (MCP Error)",
+            "title": "N/A (MCP Error)"
         }
 
 @app.get("/api/customers/{customer_name}/export")
