@@ -1,0 +1,22 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx mcp
+
+# Copy the local server
+COPY local_http_server.py .
+
+# Set default storage to /data
+ENV CUSTOMER_JIRA_STORAGE=/data
+ENV PORT=8080
+
+# Create data directory
+RUN mkdir -p /data
+
+# Expose port for HTTP server
+EXPOSE 8080
+
+# Run the local HTTP server
+CMD ["python", "local_http_server.py"]

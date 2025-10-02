@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: customer-jira-tracker-mcp-route
+  labels:
+    app: customer-jira-tracker-mcp
+spec:
+  host: customer-jira-tracker-mcp.apps.your-domain.com
+  to:
+    kind: Service
+    name: customer-jira-tracker-mcp-service
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

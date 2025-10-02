@@ -1,0 +1,22 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Copy the OpenShift application files
+COPY openshift/ .
+
+# Install dependencies
+RUN pip install --no-cache-dir .
+
+# Set default storage to /data
+ENV CUSTOMER_JIRA_STORAGE=/data
+ENV PORT=8080
+
+# Create data directory
+RUN mkdir -p /data
+
+# Expose port for HTTP server
+EXPOSE 8080
+
+# Run the HTTP server
+CMD ["python", "main.py"]
