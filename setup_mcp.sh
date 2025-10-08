@@ -113,13 +113,14 @@ cat > "$MCP_CONFIG" << EOF
         "-i",
         "--rm",
         "--name=customer-jira-tracker-mcp",
-        "-e", "CUSTOMER_JIRA_API_URL=http://host.containers.internal:8080",
+        "--network=host",
+        "-e", "CUSTOMER_JIRA_API_URL=http://localhost:8080",
         "-e", "CUSTOMER_JIRA_API_KEY=local-dev-key",
         "-e", "CUSTOMER_JIRA_SSL_VERIFY=$SSL_VERIFY_LOCAL",
         "localhost/customer-jira-tracker-mcp:local"
       ],
       "env": {
-        "CUSTOMER_JIRA_API_URL": "http://host.containers.internal:8080",
+        "CUSTOMER_JIRA_API_URL": "http://localhost:8080",
         "CUSTOMER_JIRA_API_KEY": "local-dev-key",
         "CUSTOMER_JIRA_SSL_VERIFY": "$SSL_VERIFY_LOCAL"
       }
