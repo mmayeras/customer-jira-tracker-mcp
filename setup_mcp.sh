@@ -112,18 +112,14 @@ cat > "$MCP_CONFIG" << EOF
         "run",
         "-i",
         "--rm",
-        "--restart=unless-stopped",
-        "--name=customer-jira-tracker-local",
-        "-p", "8080:8080",
-        "-v", "$PROJECT_ROOT/customer_jira_data:/data",
-        "-e", "CUSTOMER_JIRA_STORAGE=/data",
-        "-e", "CUSTOMER_JIRA_API_URL=http://localhost:8080",
+        "--name=customer-jira-tracker-mcp",
+        "-e", "CUSTOMER_JIRA_API_URL=http://host.containers.internal:8080",
         "-e", "CUSTOMER_JIRA_API_KEY=local-dev-key",
         "-e", "CUSTOMER_JIRA_SSL_VERIFY=$SSL_VERIFY_LOCAL",
-        "customer-jira-tracker:local"
+        "localhost/customer-jira-tracker-mcp:local"
       ],
       "env": {
-        "CUSTOMER_JIRA_API_URL": "http://localhost:8080",
+        "CUSTOMER_JIRA_API_URL": "http://host.containers.internal:8080",
         "CUSTOMER_JIRA_API_KEY": "local-dev-key",
         "CUSTOMER_JIRA_SSL_VERIFY": "$SSL_VERIFY_LOCAL"
       }
@@ -171,37 +167,50 @@ else
     echo "✅ Port 8080 is available for the container"
 fi
 
-# Check if container image exists
-echo "🔍 Checking if container image exists..."
+# Check if container images exist
+echo "🔍 Checking if container images exist..."
+
+# Check HTTP API server image
 if podman image exists customer-jira-tracker:local 2>/dev/null; then
     echo "✅ Container image customer-jira-tracker:local exists"
 else
-    echo "⚠️  Building container image..."
-    podman build -f Dockerfile.local -t customer-jira-tracker:local .
-    echo "✅ Container image built successfully"
+    echo "📦 Building HTTP API server image..."
+    podman build -t customer-jira-tracker:local -f Dockerfile .
+    echo "✅ HTTP API server image built successfully"
 fi
 
-# Check if container is already running
-echo "🔍 Checking if container is already running..."
+# Check MCP server image
+if podman image exists localhost/customer-jira-tracker-mcp:local 2>/dev/null; then
+    echo "✅ Container image localhost/customer-jira-tracker-mcp:local exists"
+else
+    echo "📦 Building MCP server image..."
+    podman build -t localhost/customer-jira-tracker-mcp:local -f Dockerfile.mcp .
+    echo "✅ MCP server image built successfully"
+fi
+
+# Check if HTTP API container is already running
+echo "🔍 Checking if HTTP API container is already running..."
 if podman ps --format "{{.Names}}" | grep -q "customer-jira-tracker-local"; then
-    echo "✅ Container is already running"
+    echo "✅ HTTP API container is already running"
     echo "   To restart: podman restart customer-jira-tracker-local"
     echo "   To stop: podman stop customer-jira-tracker-local"
 else
-    echo "ℹ️  Container will start automatically when Cursor connects to MCP"
-    echo "   To start manually: podman run -d --name customer-jira-tracker-local --restart=unless-stopped -p 8080:8080 -v $PROJECT_ROOT/customer_jira_data:/data customer-jira-tracker:local"
+    echo "ℹ️  HTTP API container will start automatically when you run ./run_local.sh"
+    echo "   MCP server will start automatically when Cursor connects"
 fi
 
 echo ""
 echo "🎉 Setup complete! Next steps:"
-echo "1. Restart Cursor to load the MCP configuration"
-echo "2. The container will start automatically when Cursor connects"
-echo "3. Test with: 'list customers' or 'add tickets PROJ-123 to Acme Corp'"
+echo "1. Run './run_local.sh' to start the HTTP API server"
+echo "2. Restart Cursor to load the MCP configuration"
+echo "3. MCP server will start automatically when Cursor connects"
+echo "4. Test with: 'list customers' or 'add tickets PROJ-123 to Acme Corp'"
 echo ""
 echo "🔧 Container Management:"
-echo "   View logs: podman logs customer-jira-tracker-local"
-echo "   Restart: podman restart customer-jira-tracker-local"
-echo "   Stop: podman stop customer-jira-tracker-local"
-echo "   Remove: podman rm customer-jira-tracker-local"
+echo "   Start HTTP API: ./run_local.sh"
+echo "   View HTTP logs: podman logs customer-jira-tracker-local"
+echo "   Restart HTTP: podman restart customer-jira-tracker-local"
+echo "   Stop HTTP: podman stop customer-jira-tracker-local"
+echo "   Remove HTTP: podman rm customer-jira-tracker-local"
 echo ""
 echo "📚 For detailed usage, see USAGE_GUIDE.md"

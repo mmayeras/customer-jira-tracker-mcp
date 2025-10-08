@@ -14,9 +14,9 @@ if ! command -v podman &> /dev/null; then
 fi
 
 # Check if image exists, build only if needed
-if ! podman image exists customer-jira-tracker-local 2>/dev/null || [[ "$1" == "--rebuild" ]]; then
+if ! podman image exists customer-jira-tracker:local 2>/dev/null || [[ "$1" == "--rebuild" ]]; then
     echo "📦 Building local container image..."
-    podman build -t customer-jira-tracker-local -f Dockerfile.local .
+    podman build -t customer-jira-tracker:local -f Dockerfile .
 else
     echo "✅ Container image already exists, skipping build"
     echo "   Use --rebuild to force rebuild the image"
@@ -42,8 +42,8 @@ podman run -d \
   -e CUSTOMER_JIRA_STORAGE=/data \
   -e PORT=8080 \
   -e REQUIRE_AUTH=false \
-  -e CUSTOMER_JIRA_TRACKER_API_KEY=local-dev-key \
-  customer-jira-tracker-local
+  -e CUSTOMER_JIRA_API_KEY=local-dev-key \
+  customer-jira-tracker:local
 
 # Wait for the container to start
 echo "⏳ Waiting for API to start..."

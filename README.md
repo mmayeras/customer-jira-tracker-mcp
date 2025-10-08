@@ -37,17 +37,14 @@ The system consists of three main components:
 
 ### Prerequisites
 
-- Python 3.10+
-- `uv` package manager
+- Podman (for containerized deployment)
 - Cursor IDE
-- (Optional) Podman for containerized deployment
 
 ### 1. Clone and Setup
 
 ```bash
 git clone <repository-url>
 cd jiraTracker
-uv sync
 ```
 
 ### 2. Configure MCP Integration
@@ -70,17 +67,18 @@ cp cursor-mcp-config.template.json ~/.cursor/mcp.json
 # Edit ~/.cursor/mcp.json with your specific values
 ```
 
-### 3. Start the HTTP API Server
+### 3. Start the Services
 
-#### Local Development
-```bash
-uv run local_http_server.py
-```
-
-#### Containerized (Podman)
+#### Containerized Local Development (Recommended)
 ```bash
 ./run_local.sh
 ```
+
+This will:
+- Build the HTTP API server container
+- Build the MCP server container
+- Start the HTTP API server
+- Configure MCP to use containerized services
 
 ### 4. Restart Cursor IDE
 
@@ -173,29 +171,41 @@ This is a test comment for the export functionality
 
 ### MCP Server Configuration
 
-The MCP server supports two deployment modes:
+The MCP server supports two deployment modes using containerized services:
 
-#### Local Development
+#### Local Development (Containerized)
 ```json
 {
   "customer-jira-tracker-local": {
-    "command": "uv",
-    "args": ["run", "--directory", "${PROJECT_ROOT}", "mcp_server.py"],
+    "command": "podman",
+    "args": [
+      "run", "-i", "--rm", "--name=customer-jira-tracker-mcp",
+      "-e", "CUSTOMER_JIRA_API_URL=http://host.containers.internal:8080",
+      "-e", "CUSTOMER_JIRA_API_KEY=local-dev-key",
+      "-e", "CUSTOMER_JIRA_SSL_VERIFY=false",
+      "localhost/customer-jira-tracker-mcp:local"
+    ],
     "env": {
-      "CUSTOMER_JIRA_API_URL": "http://localhost:8080",
+      "CUSTOMER_JIRA_API_URL": "http://host.containers.internal:8080",
       "CUSTOMER_JIRA_API_KEY": "local-dev-key",
-      "CUSTOMER_JIRA_SSL_VERIFY": "true"
+      "CUSTOMER_JIRA_SSL_VERIFY": "false"
     }
   }
 }
 ```
 
-#### OpenShift Production
+#### OpenShift Production (Containerized)
 ```json
 {
   "customer-jira-tracker-openshift": {
-    "command": "uv",
-    "args": ["run", "--directory", "${PROJECT_ROOT}", "mcp_server.py"],
+    "command": "podman",
+    "args": [
+      "run", "-i", "--rm", "--name=customer-jira-tracker-mcp-openshift",
+      "-e", "CUSTOMER_JIRA_API_URL=https://your-openshift-url.com",
+      "-e", "CUSTOMER_JIRA_API_KEY=your-production-key",
+      "-e", "CUSTOMER_JIRA_SSL_VERIFY=true",
+      "quay.io/your-org/customer-jira-tracker:latest"
+    ],
     "env": {
       "CUSTOMER_JIRA_API_URL": "https://your-openshift-url.com",
       "CUSTOMER_JIRA_API_KEY": "your-production-key",
@@ -245,46 +255,61 @@ Once configured, the following tools are available in Cursor:
 ### Project Structure
 ```
 jiraTracker/
-├── mcp_server.py              # MCP server implementation
-├── local_http_server.py       # HTTP API server
-├── cursor-mcp-config.json     # Cursor MCP configuration
+├── Dockerfile                # Main container image (OpenShift HTTP server)
+├── Dockerfile.mcp            # MCP server container image
+├── mcp_server.py             # MCP server implementation
+├── local_http_server.py      # HTTP API server (for local development)
+├── cursor-mcp-config.json    # Cursor MCP configuration
 ├── cursor-mcp-config.template.json  # Template for manual setup
-├── setup_mcp.sh              # Interactive setup script
-├── run_local.sh              # Local development runner
-├── openshift/                # OpenShift deployment files
-│   ├── http_server.py        # OpenShift HTTP server
-│   ├── deployment.yaml       # Kubernetes deployment
+├── setup_mcp.sh             # Interactive setup script
+├── run_local.sh             # Local development runner (containerized)
+├── openshift/               # OpenShift deployment files
+│   ├── http_server.py       # OpenShift HTTP server
+│   ├── deployment.yaml      # Kubernetes deployment
 │   └── ...
-└── customer_jira_data/       # JSON data storage
+└── customer_jira_data/      # JSON data storage
 ```
 
-### Running Tests
-```bash
-# Test MCP server
-uv run test_mcp.py
+### Container Images
 
-# Test minimal MCP functionality
-uv run test_minimal_mcp.py
-```
+The project uses two main container images:
 
-### Building for OpenShift
+1. **HTTP API Server** (`customer-jira-tracker:local`)
+   - Based on `Dockerfile`
+   - Runs the HTTP API server
+   - Used for both local development and OpenShift production
+
+2. **MCP Server** (`customer-jira-tracker-mcp:local`)
+   - Based on `Dockerfile.mcp`
+   - Runs the MCP server that bridges to the HTTP API
+   - Used by Cursor IDE for MCP integration
+
+### Building Container Images
 ```bash
-cd openshift
-podman build -t customer-jira-tracker .
+# Build HTTP API server image
+podman build -t customer-jira-tracker:local -f Dockerfile .
+
+# Build MCP server image
+podman build -t customer-jira-tracker-mcp:local -f Dockerfile.mcp .
+
+# Build for OpenShift production
+podman build -t quay.io/your-org/customer-jira-tracker:latest -f Dockerfile .
 ```
 
 ## 🚀 Deployment
 
-### Local Development
-1. Run `uv run local_http_server.py`
-2. Configure MCP with local settings
-3. Restart Cursor IDE
+### Local Development (Containerized)
+1. Run `./run_local.sh` to start HTTP API server container
+2. MCP server runs automatically when Cursor connects
+3. Configure MCP with local settings (done automatically by setup script)
+4. Restart Cursor IDE
 
 ### OpenShift Production
 1. Deploy using the provided OpenShift manifests
-2. Configure MCP with production settings
-3. Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates (default is `true`)
-4. Restart Cursor IDE
+2. Build and push container images to your registry
+3. Configure MCP with production settings
+4. Set `CUSTOMER_JIRA_SSL_VERIFY=false` for self-signed certificates (default is `true`)
+5. Restart Cursor IDE
 
 ## 🔍 Troubleshooting
 
@@ -310,11 +335,17 @@ podman build -t customer-jira-tracker .
 
 ### Debug Mode
 ```bash
-# Run MCP server with debug output
-uv run mcp_server.py
+# Check container status
+podman ps -a
+
+# View HTTP API server logs
+podman logs customer-jira-tracker-local
 
 # Test API connectivity
 curl -H "Authorization: Bearer your-api-key" http://localhost:8080/api/customers
+
+# Test MCP server manually
+echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test-client", "version": "1.0.0"}}}' | podman run --rm -i -e CUSTOMER_JIRA_API_URL=http://host.containers.internal:8080 -e CUSTOMER_JIRA_API_KEY=local-dev-key -e CUSTOMER_JIRA_SSL_VERIFY=false localhost/customer-jira-tracker-mcp:local
 ```
 
 ## 📄 License
