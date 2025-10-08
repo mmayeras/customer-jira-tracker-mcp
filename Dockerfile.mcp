@@ -1,0 +1,19 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx mcp
+
+# Copy the MCP server and JIRA client
+COPY mcp_server.py .
+COPY jira_mcp_client.py .
+COPY global_index_manager.py .
+
+# Set environment variables
+ENV CUSTOMER_JIRA_API_URL=http://localhost:8080
+ENV CUSTOMER_JIRA_API_KEY=local-dev-key
+ENV CUSTOMER_JIRA_SSL_VERIFY=false
+
+# Run the MCP server
+CMD ["python", "mcp_server.py"]
