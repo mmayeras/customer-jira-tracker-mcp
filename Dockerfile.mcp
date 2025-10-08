@@ -3,7 +3,7 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # Install dependencies
-RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx mcp
+RUN pip install --no-cache-dir fastapi uvicorn pydantic httpx "mcp==0.9.1"
 
 # Copy the MCP server and JIRA client
 COPY mcp_server.py .

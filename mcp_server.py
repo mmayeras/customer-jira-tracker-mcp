@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
-from mcp.server.lowlevel.server import NotificationOptions
+from mcp.server import NotificationOptions
 from mcp.types import (
     CallToolRequest,
     CallToolResult,
@@ -243,7 +243,7 @@ async def handle_list_tools() -> ListToolsResult:
                         "save_file": {
                             "type": "boolean",
                             "description": "Save export to file in customer data directory",
-                            "default": true
+                            "default": True
                         }
                     },
                     "required": ["customer_name"]
@@ -383,7 +383,7 @@ async def handle_list_tools() -> List[Tool]:
                     "save_file": {
                         "type": "boolean",
                         "description": "Save export to file in customer data directory",
-                        "default": true
+                        "default": True
                     }
                 },
                 "required": ["customer_name"]
