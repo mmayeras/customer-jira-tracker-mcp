@@ -238,7 +238,7 @@ async def handle_list_tools() -> ListToolsResult:
                         "include_jira": {
                             "type": "boolean",
                             "description": "Include JIRA information (requires JIRA integration)",
-                            "default": false
+                            "default": False
                         },
                         "save_file": {
                             "type": "boolean",
@@ -378,7 +378,7 @@ async def handle_list_tools() -> List[Tool]:
                     "include_jira": {
                         "type": "boolean",
                         "description": "Include JIRA information (requires JIRA integration)",
-                        "default": false
+                        "default": False
                     },
                     "save_file": {
                         "type": "boolean",
