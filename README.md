@@ -179,7 +179,7 @@ The MCP server supports two deployment modes using containerized services:
   "customer-jira-tracker-local": {
     "command": "podman",
     "args": [
-      "run", "-i", "--rm", "--name=customer-jira-tracker-mcp",
+      "run", "-i", "--name=customer-jira-tracker-mcp",
       "--network=host",
       "-e", "CUSTOMER_JIRA_API_URL=http://localhost:8080",
       "-e", "CUSTOMER_JIRA_API_KEY=local-dev-key",
@@ -201,7 +201,7 @@ The MCP server supports two deployment modes using containerized services:
   "customer-jira-tracker-openshift": {
     "command": "podman",
     "args": [
-      "run", "-i", "--rm", "--name=customer-jira-tracker-mcp-openshift",
+      "run", "-i", "--name=customer-jira-tracker-mcp-openshift",
       "-e", "CUSTOMER_JIRA_API_URL=https://your-openshift-url.com",
       "-e", "CUSTOMER_JIRA_API_KEY=your-production-key",
       "-e", "CUSTOMER_JIRA_SSL_VERIFY=true",
