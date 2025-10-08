@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: customer-jira-tracker-mcp-service
+  name: customer-jira-tracker-server-service
   labels:
-    app: customer-jira-tracker-mcp
+    app: customer-jira-tracker-server
 spec:
   selector:
-    app: customer-jira-tracker-mcp
+    app: customer-jira-tracker-server
   ports:
   - name: http
     port: 8080

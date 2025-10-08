@@ -359,23 +359,16 @@ def save_markdown_export(customer_name: str, markdown_content: str) -> str:
         raise HTTPException(status_code=500, detail="Failed to save markdown export")
 
 async def fetch_jira_ticket_data_via_mcp(ticket_key: str) -> Dict[str, str]:
-    """Fetch JIRA ticket data via MCP server"""
-    try:
-        import sys
-        import os
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from jira_mcp_client import jira_client
-        from global_index_manager import index_manager
-        return await jira_client.get_issue_data(ticket_key)
-    except Exception as e:
-        logger.error(f"Error fetching JIRA data for ticket {ticket_key} via MCP: {e}")
-        return {
-            "status": "N/A (MCP Error)",
-            "priority": "N/A (MCP Error)",
-            "assignee": "N/A (MCP Error)",
-            "last_updated": "N/A (MCP Error)",
-            "title": "N/A (MCP Error)"
-        }
+    """Fetch JIRA ticket data - simplified for server context"""
+    # Server containers don't have MCP tools available
+    # Return basic data structure for consistency
+    return {
+        "status": "N/A (Server Mode)",
+        "priority": "N/A (Server Mode)", 
+        "assignee": "N/A (Server Mode)",
+        "last_updated": "N/A (Server Mode)",
+        "title": "N/A (Server Mode)"
+    }
 
 @app.get("/api/customers/{customer_name}/export")
 async def export_customer_data(

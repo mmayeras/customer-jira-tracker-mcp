@@ -202,13 +202,13 @@ The MCP server supports two deployment modes using containerized services:
     "command": "podman",
     "args": [
       "run", "-i", "--name=customer-jira-tracker-client-openshift",
-      "-e", "CUSTOMER_JIRA_API_URL=https://your-openshift-url.com",
+      "-e", "CUSTOMER_JIRA_API_URL=https://customer-jira-tracker-server.apps.your-domain.com",
       "-e", "CUSTOMER_JIRA_API_KEY=your-production-key",
       "-e", "CUSTOMER_JIRA_SSL_VERIFY=true",
-      "quay.io/your-org/customer-jira-tracker:latest"
+      "quay.io/your-org/customer-jira-tracker-client:latest"
     ],
     "env": {
-      "CUSTOMER_JIRA_API_URL": "https://your-openshift-url.com",
+      "CUSTOMER_JIRA_API_URL": "https://customer-jira-tracker-server.apps.your-domain.com",
       "CUSTOMER_JIRA_API_KEY": "your-production-key",
       "CUSTOMER_JIRA_SSL_VERIFY": "true"
     }
@@ -294,7 +294,7 @@ podman build -t customer-jira-tracker-server:local -f Dockerfile.server .
 podman build -t customer-jira-tracker-client:local -f Dockerfile.client .
 
 # Build for OpenShift production
-podman build -t quay.io/your-org/customer-jira-tracker:latest -f Dockerfile .
+podman build -t quay.io/your-org/customer-jira-tracker-server:latest -f Dockerfile.server .
 ```
 
 ## 🚀 Deployment

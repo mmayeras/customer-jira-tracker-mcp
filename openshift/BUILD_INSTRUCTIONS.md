@@ -25,27 +25,27 @@ From the project root directory:
 
 ```bash
 # Build the image with the correct tag (AMD64 architecture)
-podman build --platform linux/amd64 -t quay.io/your-username/customer-jira-tracker:latest .
+podman build --platform linux/amd64 -t quay.io/your-username/customer-jira-tracker-server:latest -f ../Dockerfile.server ..
 
 # Optional: Build with a specific version tag
-podman build --platform linux/amd64 -t quay.io/your-username/customer-jira-tracker:v1.0.0 .
+podman build --platform linux/amd64 -t quay.io/your-username/customer-jira-tracker-server:v1.0.0 -f ../Dockerfile.server ..
 ```
 
 ### 3. Push the Image
 
 ```bash
 # Push the latest tag
-podman push quay.io/your-username/customer-jira-tracker:latest
+podman push quay.io/your-username/customer-jira-tracker-server:latest
 
 # Optional: Push version tag
-podman push quay.io/your-username/customer-jira-tracker:v1.0.0
+podman push quay.io/your-username/customer-jira-tracker-server:v1.0.0
 ```
 
 ### 4. Verify the Image
 
 ```bash
 # Test the image locally
-podman run -p 8080:8080 quay.io/your-username/customer-jira-tracker:latest
+podman run -p 8080:8080 quay.io/your-username/customer-jira-tracker-server:latest
 
 # Check if the health endpoint works
 curl http://localhost:8080/health
@@ -55,8 +55,8 @@ curl http://localhost:8080/health
 
 The deployment scripts use these default tags:
 
-- **Latest**: `quay.io/your-username/customer-jira-tracker:latest`
-- **Version**: `quay.io/your-username/customer-jira-tracker:v1.0.0` (optional)
+- **Latest**: `quay.io/your-username/customer-jira-tracker-server:latest`
+- **Version**: `quay.io/your-username/customer-jira-tracker-server:v1.0.0` (optional)
 
 ## Deployment
 
@@ -65,10 +65,10 @@ After building and pushing the image, you can deploy to OpenShift:
 ```bash
 # Deploy using the pre-built image
 cd openshift
-EXTERNAL_IMAGE=quay.io/your-username/customer-jira-tracker:latest ./deploy.sh
+EXTERNAL_IMAGE=quay.io/your-username/customer-jira-tracker-server:latest ./deploy.sh
 
 # Or deploy with a specific image tag
-EXTERNAL_IMAGE=quay.io/your-username/customer-jira-tracker:v1.0.0 ./deploy.sh
+EXTERNAL_IMAGE=quay.io/your-username/customer-jira-tracker-server:v1.0.0 ./deploy.sh
 ```
 
 ## Usage Modes
@@ -108,18 +108,18 @@ podman login quay.io
 
 ```bash
 # Clean build (no cache) with AMD64 architecture
-podman build --platform linux/amd64 --no-cache -t quay.io/your-username/customer-jira-tracker:latest .
+podman build --platform linux/amd64 --no-cache -t quay.io/your-username/customer-jira-tracker-server:latest -f ../Dockerfile.server ..
 
 # Check build logs
-podman build --platform linux/amd64 -t quay.io/your-username/customer-jira-tracker:latest . 2>&1 | tee build.log
+podman build --platform linux/amd64 -t quay.io/your-username/customer-jira-tracker-server:latest -f ../Dockerfile.server .. 2>&1 | tee build.log
 ```
 
 ### Push Issues
 
 ```bash
 # Check if image exists locally
-podman images | grep customer-jira-tracker
+podman images | grep customer-jira-tracker-server
 
 # Test image locally before pushing
-podman run --rm quay.io/your-username/customer-jira-tracker:latest python -c "print('Image works!')"
+podman run --rm quay.io/your-username/customer-jira-tracker-server:latest python -c "print('Image works!')"
 ```

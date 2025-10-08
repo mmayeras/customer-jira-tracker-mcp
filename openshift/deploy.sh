@@ -7,12 +7,12 @@ set -e
 
 # Configuration
 NAMESPACE=${NAMESPACE:-customer-jira-tracker}
-APP_NAME="customer-jira-tracker-mcp"
+APP_NAME="customer-jira-tracker-server"
 # You can change this to any public registry image
-EXTERNAL_IMAGE=${EXTERNAL_IMAGE:-quay.io/rh_ee_mmayeras/customer-jira-tracker:latest}
-ROUTE_HOST=${ROUTE_HOST:-customer-jira-tracker-mcp.apps.your-domain.com}
+EXTERNAL_IMAGE=${EXTERNAL_IMAGE:-quay.io/rh_ee_mmayeras/customer-jira-tracker-server:latest}
+ROUTE_HOST=${ROUTE_HOST:-customer-jira-tracker-server.apps.your-domain.com}
 
-echo "🚀 Deploying Customer JIRA Tracker MCP Server to OpenShift"
+echo "🚀 Deploying Customer JIRA Tracker Server to OpenShift"
 echo "Namespace: $NAMESPACE"
 echo "App Name: $APP_NAME"
 echo "External Image: $EXTERNAL_IMAGE"
@@ -43,21 +43,21 @@ cat > deployment-prebuilt.yaml << EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: customer-jira-tracker-mcp
+  name: customer-jira-tracker-server
   labels:
-    app: customer-jira-tracker-mcp
+    app: customer-jira-tracker-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: customer-jira-tracker-mcp
+      app: customer-jira-tracker-server
   template:
     metadata:
       labels:
-        app: customer-jira-tracker-mcp
+        app: customer-jira-tracker-server
     spec:
       containers:
-      - name: customer-jira-tracker-mcp
+      - name: customer-jira-tracker-server
         image: $EXTERNAL_IMAGE
         imagePullPolicy: Always
         ports:
@@ -112,7 +112,7 @@ oc apply -f service.yaml
 # Create route
 echo "🛣️  Creating route..."
 # Update route with actual host
-sed "s/customer-jira-tracker-mcp.apps.your-domain.com/$ROUTE_HOST/g" route.yaml | oc apply -f -
+sed "s/customer-jira-tracker-server.apps.your-domain.com/$ROUTE_HOST/g" route.yaml | oc apply -f -
 
 # Wait for deployment to be ready
 echo "⏳ Waiting for deployment to be ready..."
@@ -133,5 +133,5 @@ oc get services -l app=$APP_NAME
 oc get routes -l app=$APP_NAME
 
 echo ""
-echo "🎉 Customer JIRA Tracker MCP Server is now running on OpenShift!"
+echo "🎉 Customer JIRA Tracker Server is now running on OpenShift!"
 echo "You can now configure Cursor to use the HTTP endpoints instead of local MCP."

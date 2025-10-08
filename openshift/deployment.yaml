@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: customer-jira-tracker-mcp
+  name: customer-jira-tracker-server
   labels:
-    app: customer-jira-tracker-mcp
+    app: customer-jira-tracker-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: customer-jira-tracker-mcp
+      app: customer-jira-tracker-server
   template:
     metadata:
       labels:
-        app: customer-jira-tracker-mcp
+        app: customer-jira-tracker-server
     spec:
       containers:
-      - name: customer-jira-tracker-mcp
+      - name: customer-jira-tracker-server
         image: quay.io/rh_ee_mmayeras/customer-jira-tracker:latest
         imagePullPolicy: Always
         ports:

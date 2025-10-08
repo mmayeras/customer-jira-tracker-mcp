@@ -14,7 +14,7 @@ cd openshift
 ./deploy.sh
 
 # Or deploy with a specific image tag
-EXTERNAL_IMAGE=quay.io/your-username/customer-jira-tracker:v1.0.0 ./deploy.sh
+EXTERNAL_IMAGE=quay.io/your-username/customer-jira-tracker-server:v1.0.0 ./deploy.sh
 ```
 
 ## Prerequisites
@@ -34,8 +34,8 @@ Set these environment variables before running:
 
 ```bash
 export NAMESPACE="customer-jira-tracker"  # Default namespace
-export ROUTE_HOST="customer-jira-tracker-mcp.apps.your-cluster.com"  # Your route hostname
-export EXTERNAL_IMAGE="quay.io/your-username/customer-jira-tracker:latest"  # Default image
+export ROUTE_HOST="customer-jira-tracker-server.apps.your-cluster.com"  # Your route hostname
+export EXTERNAL_IMAGE="quay.io/your-username/customer-jira-tracker-server:latest"  # Default image
 ```
 
 ## Quick Start

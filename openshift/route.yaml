@@ -1,14 +1,14 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: customer-jira-tracker-mcp-route
+  name: customer-jira-tracker-server-route
   labels:
-    app: customer-jira-tracker-mcp
+    app: customer-jira-tracker-server
 spec:
-  host: customer-jira-tracker-mcp.apps.your-domain.com
+  host: customer-jira-tracker-server.apps.your-domain.com
   to:
     kind: Service
-    name: customer-jira-tracker-mcp-service
+    name: customer-jira-tracker-server-service
     weight: 100
   port:
     targetPort: http

@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: customer-jira-tracker-data
   labels:
-    app: customer-jira-tracker-mcp
+    app: customer-jira-tracker-server
 spec:
   accessModes:
     - ReadWriteOnce
