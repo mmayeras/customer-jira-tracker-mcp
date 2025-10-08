@@ -252,6 +252,145 @@ async def handle_list_tools() -> ListToolsResult:
         ]
     )
 
+@server.list_tools()
+async def handle_list_tools() -> List[Tool]:
+    """List available tools"""
+    return [
+        Tool(
+            name="get_customer_tickets",
+            description="Get all tickets for a specific customer",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer"
+                    }
+                },
+                "required": ["customer_name"]
+            }
+        ),
+        Tool(
+            name="add_customer_tickets",
+            description="Add tickets to a customer",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer"
+                    },
+                    "ticket_keys": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of JIRA ticket keys to add"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Optional notes for the customer"
+                    }
+                },
+                "required": ["customer_name", "ticket_keys"]
+            }
+        ),
+        Tool(
+            name="add_ticket_comment",
+            description="Add a comment to a specific ticket",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer"
+                    },
+                    "ticket_key": {
+                        "type": "string",
+                        "description": "JIRA ticket key"
+                    },
+                    "comment": {
+                        "type": "string",
+                        "description": "Comment text to add"
+                    }
+                },
+                "required": ["customer_name", "ticket_key", "comment"]
+            }
+        ),
+        Tool(
+            name="update_customer_notes",
+            description="Update customer notes",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer"
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "New notes for the customer"
+                    }
+                },
+                "required": ["customer_name", "notes"]
+            }
+        ),
+        Tool(
+            name="remove_customer_tickets",
+            description="Remove tickets from a customer",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer"
+                    },
+                    "ticket_keys": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of JIRA ticket keys to remove"
+                    }
+                },
+                "required": ["customer_name", "ticket_keys"]
+            }
+        ),
+        Tool(
+            name="list_customers",
+            description="List all customers with their ticket counts",
+            inputSchema={
+                "type": "object",
+                "properties": {}
+            }
+        ),
+        Tool(
+            name="export_customer_data",
+            description="Export customer ticket data in Markdown format",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer to export"
+                    },
+                    "format": {
+                        "type": "string",
+                        "description": "Export format (default: markdown)",
+                        "default": "markdown"
+                    },
+                    "include_jira": {
+                        "type": "boolean",
+                        "description": "Include JIRA information (requires JIRA integration)",
+                        "default": false
+                    },
+                    "save_file": {
+                        "type": "boolean",
+                        "description": "Save export to file in customer data directory",
+                        "default": true
+                    }
+                },
+                "required": ["customer_name"]
+            }
+        )
+    ]
+
 @server.call_tool()
 async def handle_call_tool(name: str, arguments: Dict[str, Any]):
     """Handle tool calls"""
