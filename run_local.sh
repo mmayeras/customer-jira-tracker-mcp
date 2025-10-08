@@ -13,17 +13,30 @@ if ! command -v podman &> /dev/null; then
     exit 1
 fi
 
-# Build the local image
-echo "📦 Building local container image..."
-podman build -t customer-jira-tracker-local -f Dockerfile.local .
+# Check if image exists, build only if needed
+if ! podman image exists customer-jira-tracker-local 2>/dev/null || [[ "$1" == "--rebuild" ]]; then
+    echo "📦 Building local container image..."
+    podman build -t customer-jira-tracker-local -f Dockerfile.local .
+else
+    echo "✅ Container image already exists, skipping build"
+    echo "   Use --rebuild to force rebuild the image"
+fi
 
 # Create data directory if it doesn't exist
 mkdir -p ./customer_jira_data
+
+# Stop and remove existing container if it exists
+if podman ps -a --format "{{.Names}}" | grep -q "customer-jira-tracker-local"; then
+    echo "🛑 Stopping existing container..."
+    podman stop customer-jira-tracker-local 2>/dev/null || true
+    podman rm customer-jira-tracker-local 2>/dev/null || true
+fi
 
 # Run the container
 echo "🏃 Running container..."
 podman run -d \
   --name customer-jira-tracker-local \
+  --restart=unless-stopped \
   -p 8080:8080 \
   -v ./customer_jira_data:/data \
   -e CUSTOMER_JIRA_STORAGE=/data \
@@ -47,8 +60,12 @@ if curl -s http://localhost:8080/health > /dev/null; then
     echo "2. Update the API URL if needed"
     echo "3. Restart Cursor"
     echo ""
-    echo "🛑 To stop the API: podman stop customer-jira-tracker-local"
-    echo "🗑️  To remove the container: podman rm customer-jira-tracker-local"
+    echo "🔧 Container Management:"
+    echo "   View logs: podman logs customer-jira-tracker-local"
+    echo "   Restart: podman restart customer-jira-tracker-local"
+    echo "   Stop: podman stop customer-jira-tracker-local"
+    echo "   Remove: podman rm customer-jira-tracker-local"
+    echo "   Rebuild: ./run_local.sh --rebuild"
 else
     echo "❌ Failed to start API. Check logs with: podman logs customer-jira-tracker-local"
     exit 1
