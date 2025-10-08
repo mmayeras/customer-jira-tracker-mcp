@@ -60,7 +60,7 @@ app = FastAPI(
 )
 
 # Configuration
-STORAGE_DIR = os.getenv("CUSTOMER_JIRA_STORAGE", "./customer_jira_data")
+STORAGE_DIR = os.getenv("CUSTOMER_JIRA_STORAGE", os.path.join(os.path.dirname(os.path.abspath(__file__)), "customer_jira_data"))
 REQUIRE_AUTH = os.getenv("REQUIRE_AUTH", "false").lower() == "true"
 API_KEY = os.getenv("CUSTOMER_JIRA_API_KEY", "local-dev-key")
 
@@ -249,7 +249,7 @@ async def get_customer_tickets(
 ):
     """Get all tickets for a customer"""
     customer_data = load_customer_data(customer_name)
-    return customer_data.dict()
+    return customer_data.model_dump()
 
 @app.post("/api/customers/{customer_name}/tickets")
 async def add_customer_tickets(
@@ -285,7 +285,7 @@ async def add_customer_tickets(
     customer_data.last_updated = datetime.now().isoformat()
     
     save_customer_data(customer_data)
-    return customer_data.dict()
+    return customer_data.model_dump()
 
 @app.post("/api/customers/{customer_name}/tickets/{ticket_key}/comments")
 async def add_ticket_comment(
@@ -319,7 +319,7 @@ async def add_ticket_comment(
     customer_data.last_updated = datetime.now().isoformat()
     
     save_customer_data(customer_data)
-    return customer_data.dict()
+    return customer_data.model_dump()
 
 @app.put("/api/customers/{customer_name}/notes")
 async def update_customer_notes(
@@ -333,7 +333,7 @@ async def update_customer_notes(
     customer_data.last_updated = datetime.now().isoformat()
     
     save_customer_data(customer_data)
-    return customer_data.dict()
+    return customer_data.model_dump()
 
 @app.delete("/api/customers/{customer_name}/tickets")
 async def remove_customer_tickets(
@@ -354,7 +354,7 @@ async def remove_customer_tickets(
     customer_data.last_updated = datetime.now().isoformat()
     
     save_customer_data(customer_data)
-    return customer_data.dict()
+    return customer_data.model_dump()
 
 @app.get("/api/customers")
 async def list_customers(api_key: str = Depends(get_api_key)):
