@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: customer-jira-tracker-mcp
-        image: customer-jira-tracker:latest
+        image: quay.io/rh_ee_mmayeras/customer-jira-tracker:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
