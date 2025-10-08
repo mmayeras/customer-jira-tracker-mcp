@@ -179,12 +179,12 @@ The MCP server supports two deployment modes using containerized services:
   "customer-jira-tracker-local": {
     "command": "podman",
     "args": [
-      "run", "-i", "--name=customer-jira-tracker-mcp",
+      "run", "-i", "--name=customer-jira-tracker-client",
       "--network=host",
       "-e", "CUSTOMER_JIRA_API_URL=http://localhost:8080",
       "-e", "CUSTOMER_JIRA_API_KEY=local-dev-key",
       "-e", "CUSTOMER_JIRA_SSL_VERIFY=false",
-      "localhost/customer-jira-tracker-mcp:local"
+      "localhost/customer-jira-tracker-client:local"
     ],
     "env": {
       "CUSTOMER_JIRA_API_URL": "http://localhost:8080",
@@ -201,7 +201,7 @@ The MCP server supports two deployment modes using containerized services:
   "customer-jira-tracker-openshift": {
     "command": "podman",
     "args": [
-      "run", "-i", "--name=customer-jira-tracker-mcp-openshift",
+      "run", "-i", "--name=customer-jira-tracker-client-openshift",
       "-e", "CUSTOMER_JIRA_API_URL=https://your-openshift-url.com",
       "-e", "CUSTOMER_JIRA_API_KEY=your-production-key",
       "-e", "CUSTOMER_JIRA_SSL_VERIFY=true",
@@ -275,23 +275,23 @@ jiraTracker/
 
 The project uses two main container images:
 
-1. **HTTP API Server** (`customer-jira-tracker:local`)
-   - Based on `Dockerfile`
+1. **HTTP API Server** (`customer-jira-tracker-server:local`)
+   - Based on `Dockerfile.server`
    - Runs the HTTP API server
    - Used for both local development and OpenShift production
 
-2. **MCP Server** (`customer-jira-tracker-mcp:local`)
-   - Based on `Dockerfile.mcp`
+2. **MCP Client** (`customer-jira-tracker-client:local`)
+   - Based on `Dockerfile.client`
    - Runs the MCP server that bridges to the HTTP API
    - Used by Cursor IDE for MCP integration
 
 ### Building Container Images
 ```bash
 # Build HTTP API server image
-podman build -t customer-jira-tracker:local -f Dockerfile .
+podman build -t customer-jira-tracker-server:local -f Dockerfile.server .
 
-# Build MCP server image
-podman build -t customer-jira-tracker-mcp:local -f Dockerfile.mcp .
+# Build MCP client image
+podman build -t customer-jira-tracker-client:local -f Dockerfile.client .
 
 # Build for OpenShift production
 podman build -t quay.io/your-org/customer-jira-tracker:latest -f Dockerfile .
@@ -346,7 +346,7 @@ podman logs customer-jira-tracker-local
 curl -H "Authorization: Bearer your-api-key" http://localhost:8080/api/customers
 
 # Test MCP server manually
-echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test-client", "version": "1.0.0"}}}' | podman run --rm -i -e CUSTOMER_JIRA_API_URL=http://host.containers.internal:8080 -e CUSTOMER_JIRA_API_KEY=local-dev-key -e CUSTOMER_JIRA_SSL_VERIFY=false localhost/customer-jira-tracker-mcp:local
+echo '{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test-client", "version": "1.0.0"}}}' | podman run --rm -i -e CUSTOMER_JIRA_API_URL=http://host.containers.internal:8080 -e CUSTOMER_JIRA_API_KEY=local-dev-key -e CUSTOMER_JIRA_SSL_VERIFY=false localhost/customer-jira-tracker-client:local
 ```
 
 ## 📄 License

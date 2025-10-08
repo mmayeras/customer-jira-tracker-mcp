@@ -112,12 +112,12 @@ cat > "$MCP_CONFIG" << EOF
         "run",
         "-i",
         "--rm",
-        "--name=customer-jira-tracker-mcp",
+        "--name=customer-jira-tracker-client",
         "--network=host",
         "-e", "CUSTOMER_JIRA_API_URL=http://localhost:8080",
         "-e", "CUSTOMER_JIRA_API_KEY=local-dev-key",
         "-e", "CUSTOMER_JIRA_SSL_VERIFY=$SSL_VERIFY_LOCAL",
-        "localhost/customer-jira-tracker-mcp:local"
+        "localhost/customer-jira-tracker-client:local"
       ],
       "env": {
         "CUSTOMER_JIRA_API_URL": "http://localhost:8080",
@@ -172,29 +172,29 @@ fi
 echo "🔍 Checking if container images exist..."
 
 # Check HTTP API server image
-if podman image exists customer-jira-tracker:local 2>/dev/null; then
-    echo "✅ Container image customer-jira-tracker:local exists"
+if podman image exists customer-jira-tracker-server:local 2>/dev/null; then
+    echo "✅ Container image customer-jira-tracker-server:local exists"
 else
     echo "📦 Building HTTP API server image..."
-    podman build -t customer-jira-tracker:local -f Dockerfile .
+    podman build -t customer-jira-tracker-server:local -f Dockerfile.server .
     echo "✅ HTTP API server image built successfully"
 fi
 
-# Check MCP server image
-if podman image exists localhost/customer-jira-tracker-mcp:local 2>/dev/null; then
-    echo "✅ Container image localhost/customer-jira-tracker-mcp:local exists"
+# Check MCP client image
+if podman image exists localhost/customer-jira-tracker-client:local 2>/dev/null; then
+    echo "✅ Container image localhost/customer-jira-tracker-client:local exists"
 else
-    echo "📦 Building MCP server image..."
-    podman build -t localhost/customer-jira-tracker-mcp:local -f Dockerfile.mcp .
-    echo "✅ MCP server image built successfully"
+    echo "📦 Building MCP client image..."
+    podman build -t localhost/customer-jira-tracker-client:local -f Dockerfile.client .
+    echo "✅ MCP client image built successfully"
 fi
 
 # Check if HTTP API container is already running
 echo "🔍 Checking if HTTP API container is already running..."
-if podman ps --format "{{.Names}}" | grep -q "customer-jira-tracker-local"; then
-    echo "✅ HTTP API container is already running"
-    echo "   To restart: podman restart customer-jira-tracker-local"
-    echo "   To stop: podman stop customer-jira-tracker-local"
+if podman ps --format "{{.Names}}" | grep -q "customer-jira-tracker-server"; then
+    echo "✅ HTTP API server container is already running"
+    echo "   To restart: podman restart customer-jira-tracker-server"
+    echo "   To stop: podman stop customer-jira-tracker-server"
 else
     echo "ℹ️  HTTP API container will start automatically when you run ./run_local.sh"
     echo "   MCP server will start automatically when Cursor connects"
@@ -209,9 +209,9 @@ echo "4. Test with: 'list customers' or 'add tickets PROJ-123 to Acme Corp'"
 echo ""
 echo "🔧 Container Management:"
 echo "   Start HTTP API: ./run_local.sh"
-echo "   View HTTP logs: podman logs customer-jira-tracker-local"
-echo "   Restart HTTP: podman restart customer-jira-tracker-local"
-echo "   Stop HTTP: podman stop customer-jira-tracker-local"
-echo "   Remove HTTP: podman rm customer-jira-tracker-local"
+echo "   View HTTP logs: podman logs customer-jira-tracker-server"
+echo "   Restart HTTP: podman restart customer-jira-tracker-server"
+echo "   Stop HTTP: podman stop customer-jira-tracker-server"
+echo "   Remove HTTP: podman rm customer-jira-tracker-server"
 echo ""
 echo "📚 For detailed usage, see USAGE_GUIDE.md"
